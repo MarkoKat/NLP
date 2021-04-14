@@ -5,6 +5,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
+from sklearn.utils import shuffle
+from sklearn.metrics import f1_score, accuracy_score
 
 # ---------------- Data preparation/pre-processing ---------------------------------------------------------------------
 
@@ -53,6 +55,9 @@ messages = df_crew['Message']
 # column CodePeliminary
 classes = df_crew['CodePreliminary']
 # classes = df_diss['CodePreliminary']
+
+messages, classes = shuffle(messages, classes, random_state=10)
+
 message_classes = []
 
 for el in classes:
@@ -61,6 +66,8 @@ for el in classes:
     el = el[:-1]
   message_classes.append(crew_dict[el])
   # message_classes.append(diss_dict[el])
+
+print(message_classes)
 
 # preparation of train data
 mes_train = messages[0:567]
@@ -126,3 +133,12 @@ for p in range(len(predictions)):
 # ---------------------- Accuracy --------------------------------------------------
 print('Accuracy:')
 print(clf.score(x_test, class_test))
+
+print('Accuracy2:')
+print(accuracy_score(class_test, predictions))
+
+print('F1 (micro):')
+print(f1_score(class_test, predictions, average='micro'))
+
+print('F1 (macro):')
+print(f1_score(class_test, predictions, average='macro'))
