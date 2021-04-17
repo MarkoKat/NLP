@@ -6,7 +6,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.utils import shuffle
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn import metrics
+from sklearn.model_selection import StratifiedShuffleSplit
 
 # ---------------- Data preparation/pre-processing ---------------------------------------------------------------------
 
@@ -77,6 +78,20 @@ class_train = message_classes[0:567]
 mes_test = messages[567:711]
 class_test = message_classes[567:711]
 
+sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=10)
+print("StratifiedShuffleSplit - n_splits: ", sss.get_n_splits(messages, message_classes))
+
+# Stratified split
+message_classes_np = np.array(message_classes)
+for train_index, test_index in sss.split(messages, message_classes):
+    # print("TRAIN:", train_index, "TEST:", test_index)
+    mes_train, mes_test = messages[train_index], messages[test_index]
+    class_train, class_test = message_classes_np[train_index], message_classes_np[test_index]
+    # print(crew_messages[train_index])
+    # print(message_classes_np[test_index])
+
+print("Train length: ", len(class_train), " Test length: ", len(class_test))
+
 # # preparation of train data
 # mes_train = messages[0:100]
 # class_train = message_classes[0:100]
@@ -135,10 +150,16 @@ print('Accuracy:')
 print(clf.score(x_test, class_test))
 
 print('Accuracy2:')
-print(accuracy_score(class_test, predictions))
+print(metrics.accuracy_score(class_test, predictions))
 
 print('F1 (micro):')
-print(f1_score(class_test, predictions, average='micro'))
+print(metrics.f1_score(class_test, predictions, average='micro'))
 
 print('F1 (macro):')
-print(f1_score(class_test, predictions, average='macro'))
+print(metrics.f1_score(class_test, predictions, average='macro'))
+
+# print('Confusion matrix --------------------------------')
+# print(metrics.confusion_matrix(class_test, predictions))
+
+print('Classification report ---------------------------')
+print(metrics.classification_report(class_test, predictions, digits=3))
