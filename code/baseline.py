@@ -8,56 +8,47 @@ from sklearn.feature_selection import f_classif
 from sklearn.utils import shuffle
 from sklearn import metrics
 from sklearn.model_selection import StratifiedShuffleSplit
+import collections
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 # ---------------- Data preparation/pre-processing ---------------------------------------------------------------------
 
+sheet_name_crew = "CREW data"
+sheet_name_diss = "Discussion only data"
+
 # reading files
-df_crew = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='CREW data')
-df_diss = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='Discussion only data')
+df_data = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_crew)
 
 
-# column CodePeliminary (CREW data)
-crew_class = df_crew['CodePreliminary']
+# column Message
+messages = df_data['Message']
 
-# column CodePeliminary (Discussion only data)
-diss_class = df_diss['CodePreliminary']
+# column CodePeliminary
+classes = df_data['CodePreliminary']
 
 # preparation of dictionary of types
-crew_dict = {}
+class_dict = {}
 index = 0
-for code in crew_class:
+for code in classes:
   code = code.lower()
   if code[-1] == " ":
     code = code[:-1]
-  if code not in crew_dict:
-    crew_dict[code] = index
+  if code not in class_dict:
+    class_dict[code] = index
     index += 1
 
-# diss_dict = {}
-# index = 0
-# for code in diss_class:
-#   code = code.lower()
-#   if code not in diss_dict:
-#     diss_dict[code] = index
-#     index += 1
-
-# for key,value in sorted(crew_dict.items()):
-#   print(key, value)
-
 print('Classes:')
-print(crew_dict)
-# print(diss_dict)
+print(class_dict)
+
+crew_dict_s = {y: x for x, y in class_dict.items()}
+print(crew_dict_s)
+
 print('----------')
 
-# column Message
-messages = df_crew['Message']
-# messages = df_diss['Message']
-
-# column CodePeliminary
-classes = df_crew['CodePreliminary']
-# classes = df_diss['CodePreliminary']
-
-messages, classes = shuffle(messages, classes, random_state=10)
+# messages, classes = shuffle(messages, classes, random_state=10)
 
 message_classes = []
 
@@ -65,18 +56,59 @@ for el in classes:
   el = el.lower()
   if el[-1] == " ":
     el = el[:-1]
-  message_classes.append(crew_dict[el])
-  # message_classes.append(diss_dict[el])
+  message_classes.append(class_dict[el])
 
 print(message_classes)
 
+# Remove classes with small number of samples
+
+all_dict = {}
+for code in message_classes:
+    if crew_dict_s[code] not in all_dict:
+        all_dict[crew_dict_s[code]] = 1
+    else:
+        all_dict[crew_dict_s[code]] += 1
+
+all_dict_print = collections.OrderedDict(sorted(all_dict.items()))
+print("Class counts")
+print(all_dict_print)
+
+all_dict_copy = all_dict.copy()
+del_keys = []
+for key in all_dict_copy:
+    if all_dict_copy[key] < 3:
+        del all_dict[key]
+        del_keys.append(key)
+
+print('Delete keys list:')
+print(del_keys)
+
+print("Data length: ", len(message_classes), " - ", len(messages))
+
+messages_np = np.array(messages)
+for i in range(len(message_classes)):
+    for del_key in del_keys:
+        if crew_dict_s[message_classes[i]] == del_key:
+            # print(del_key)
+            # print(crew_messages[i])
+            message_classes[i] = None
+            messages_np[i] = None
+            break
+
+message_classes = list(filter(lambda a: a is not None, message_classes))
+messages = list(filter(lambda a: a is not None, messages_np))
+messages = np.array(messages)
+print("Data length (after removal): ", len(message_classes), " - ", len(messages))
+
+# -------------------------------------------
+
 # preparation of train data
-mes_train = messages[0:567]
-class_train = message_classes[0:567]
+mes_train = None
+class_train = None
 
 # preparation of test data
-mes_test = messages[567:711]
-class_test = message_classes[567:711]
+mes_test = None
+class_test = None
 
 sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=10)
 print("StratifiedShuffleSplit - n_splits: ", sss.get_n_splits(messages, message_classes))
@@ -92,33 +124,22 @@ for train_index, test_index in sss.split(messages, message_classes):
 
 print("Train length: ", len(class_train), " Test length: ", len(class_test))
 
-# # preparation of train data
-# mes_train = messages[0:100]
-# class_train = message_classes[0:100]
-#
-# # preparation of test data
-# mes_test = messages[100:131]
-# class_test = message_classes[100:131]
-
 # ------------------ TFIDF ----------------------------
 
-vect = TfidfVectorizer() # parameters for tokenization, stopwords can be passed
+vect = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
 tfidf = vect.fit_transform(mes_train)
 tfidf_test = vect.transform(mes_test)
 
 ti2 = tfidf.T.A
-ti3 = list(map(list, zip(*ti2)))
-
-X = ti3
-y = class_train
+messages_tfidf = list(map(list, zip(*ti2)))
 
 # --------- Select top 'k' of the vectorized features ---------
 TOP_K = 20000
-selector = SelectKBest(f_classif, k=min(TOP_K, len(X[1])))
-selector.fit(X, class_train)
+selector = SelectKBest(f_classif, k=min(TOP_K, len(messages_tfidf[1])))
+selector.fit(messages_tfidf, class_train)
 print('----------')
 try:
-  x_train = selector.transform(X).astype('float32')
+  x_train = selector.transform(messages_tfidf).astype('float32')
 except RuntimeWarning as error:
   print(error)
 try:
@@ -128,22 +149,20 @@ except RuntimeWarning as error:
 
 # ---------------- MLP ----------------------------------------
 clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                     hidden_layer_sizes=(5, 2), random_state=1)
+                     hidden_layer_sizes=(10, 10), random_state=1)
 
-# clf.fit(X, y)
-clf.fit(x_train, y)
+# clf = RandomForestClassifier(max_depth=5, random_state=0)
+
+clf.fit(x_train, class_train)
 
 # ----------------- Make predictions ------------------------------------------------
 print('Predictions:')
 # predictions = clf.predict(tfidf_test)
 predictions = clf.predict(x_test)
 for p in range(len(predictions)):
-  str_pred = list(crew_dict.keys())[list(crew_dict.values()).index(predictions[p])]
-  str_true = list(crew_dict.keys())[list(crew_dict.values()).index(class_test[p])]
-  # str_pred = list(diss_dict.keys())[list(diss_dict.values()).index(predictions[p])]
-  # str_true = list(diss_dict.keys())[list(diss_dict.values()).index(class_test[p])]
+  str_pred = crew_dict_s[predictions[p]]
+  str_true = crew_dict_s[class_test[p]]
   print('Predicted: ', str_pred, ' - True: ', str_true)
-
 
 # ---------------------- Accuracy --------------------------------------------------
 print('Accuracy:')
