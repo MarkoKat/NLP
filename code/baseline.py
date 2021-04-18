@@ -133,6 +133,9 @@ tfidf_test = vect.transform(mes_test)
 ti2 = tfidf.T.A
 messages_tfidf = list(map(list, zip(*ti2)))
 
+# ti3 = tfidf_test.T.A
+# tfidf_test = list(map(list, zip(*ti3)))
+
 # --------- Select top 'k' of the vectorized features ---------
 TOP_K = 20000
 selector = SelectKBest(f_classif, k=min(TOP_K, len(messages_tfidf[1])))
