@@ -13,6 +13,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from stemming import get_stemms, get_lemmas
+from stop_words import remove_stopwords
 
 # ---------------- Data preparation/pre-processing ---------------------------------------------------------------------
 
@@ -43,6 +45,7 @@ for code in classes:
 print('Classes:')
 print(class_dict)
 
+# Switch keys and values in dict
 crew_dict_s = {y: x for x, y in class_dict.items()}
 print(crew_dict_s)
 
@@ -76,7 +79,7 @@ print(all_dict_print)
 all_dict_copy = all_dict.copy()
 del_keys = []
 for key in all_dict_copy:
-    if all_dict_copy[key] < 3:
+    if all_dict_copy[key] < 5:
         del all_dict[key]
         del_keys.append(key)
 
@@ -99,6 +102,21 @@ message_classes = list(filter(lambda a: a is not None, message_classes))
 messages = list(filter(lambda a: a is not None, messages_np))
 messages = np.array(messages)
 print("Data length (after removal): ", len(message_classes), " - ", len(messages))
+
+# Stemming/lemmatisation
+
+print('MESSAGES ------------------------------------------------------')
+print(messages[:10])
+
+# print('STEMMED MESSAGES ----')
+# messages = get_lemmas(messages)
+# messages = np.array(messages)
+# print(messages[:10])
+
+# print('STOPWORDS REMOVED:')
+# messages = remove_stopwords(messages)
+# messages = np.array(messages)
+# print(messages[:10])
 
 # -------------------------------------------
 
@@ -126,37 +144,44 @@ print("Train length: ", len(class_train), " Test length: ", len(class_test))
 
 # ------------------ TFIDF ----------------------------
 
-vect = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
+vect = TfidfVectorizer(min_df=2)  # parameters for tokenization, stopwords can be passed
 tfidf = vect.fit_transform(mes_train)
 tfidf_test = vect.transform(mes_test)
 
 ti2 = tfidf.T.A
 messages_tfidf = list(map(list, zip(*ti2)))
 
-# ti3 = tfidf_test.T.A
-# tfidf_test = list(map(list, zip(*ti3)))
+ti3 = tfidf_test.T.A
+tfidf_test = list(map(list, zip(*ti3)))
+
+print("TF-IDF feature names: ", vect.get_feature_names())
+print("Number of TF-IDF features: ", len(vect.get_feature_names()))
 
 # --------- Select top 'k' of the vectorized features ---------
-TOP_K = 20000
-selector = SelectKBest(f_classif, k=min(TOP_K, len(messages_tfidf[1])))
-selector.fit(messages_tfidf, class_train)
-print('----------')
-try:
-  x_train = selector.transform(messages_tfidf).astype('float32')
-except RuntimeWarning as error:
-  print(error)
-try:
-  x_test = selector.transform(tfidf_test).astype('float32')
-except RuntimeWarning as error:
-  print(error)
+# TOP_K = 20000
+# selector = SelectKBest(f_classif, k=min(TOP_K, len(messages_tfidf[1])))
+# selector.fit(messages_tfidf, class_train)
+# print('----------')
+# try:
+#   x_train = selector.transform(messages_tfidf).astype('float32')
+# except RuntimeWarning as error:
+#   print(error)
+# try:
+#   x_test = selector.transform(tfidf_test).astype('float32')
+# except RuntimeWarning as error:
+#   print(error)
+
+x_train = messages_tfidf
+x_test = tfidf_test
 
 # ---------------- MLP ----------------------------------------
-clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                     hidden_layer_sizes=(10, 10), random_state=1)
+clf = MLPClassifier(solver='adam', alpha=1e-5, activation='relu', max_iter=5000,
+                    hidden_layer_sizes=(20), random_state=1, learning_rate='constant')
 
 # clf = RandomForestClassifier(max_depth=5, random_state=0)
 
 clf.fit(x_train, class_train)
+print("Number of iterations: ", clf.n_iter_)
 
 # ----------------- Make predictions ------------------------------------------------
 print('Predictions:')
@@ -165,7 +190,7 @@ predictions = clf.predict(x_test)
 for p in range(len(predictions)):
   str_pred = crew_dict_s[predictions[p]]
   str_true = crew_dict_s[class_test[p]]
-  print('Predicted: ', str_pred, ' - True: ', str_true)
+  # print('Predicted: ', str_pred, ' - True: ', str_true)
 
 # ---------------------- Accuracy --------------------------------------------------
 print('Accuracy:')
