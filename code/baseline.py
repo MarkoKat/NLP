@@ -15,6 +15,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from stemming import get_stemms, get_lemmas
 from stop_words import remove_stopwords
+from similarity_analyse import get_response_tfidf_dict, get_tfidf_books, get_book_dict
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ---------------- Data preparation/pre-processing ---------------------------------------------------------------------
 
@@ -30,6 +32,12 @@ messages = df_data['Message']
 
 # column CodePeliminary
 classes = df_data['CodePreliminary']
+
+# Links to responses associated with each message
+response_link = df_data['Response Number']
+
+# Book id for each message
+book_ids = df_data['Book ID']
 
 # preparation of dictionary of types
 class_dict = {}
@@ -123,10 +131,14 @@ print(messages[:10])
 # preparation of train data
 mes_train = None
 class_train = None
+book_idx_train = None
+response_link_train = None
 
 # preparation of test data
 mes_test = None
 class_test = None
+book_idx_test = None
+response_link_test = None
 
 sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=10)
 print("StratifiedShuffleSplit - n_splits: ", sss.get_n_splits(messages, message_classes))
@@ -137,6 +149,8 @@ for train_index, test_index in sss.split(messages, message_classes):
     # print("TRAIN:", train_index, "TEST:", test_index)
     mes_train, mes_test = messages[train_index], messages[test_index]
     class_train, class_test = message_classes_np[train_index], message_classes_np[test_index]
+    book_idx_train, book_idx_test = book_ids[train_index], book_ids[test_index]
+    response_link_train, response_link_test = response_link[train_index], response_link[test_index]
     # print(crew_messages[train_index])
     # print(message_classes_np[test_index])
 
@@ -210,3 +224,82 @@ print(metrics.f1_score(class_test, predictions, average='macro'))
 
 print('Classification report ---------------------------')
 print(metrics.classification_report(class_test, predictions, digits=3))
+
+# Probabilities ----------------------------------------------------------
+example_index = 3
+# print("True: ", class_test[0:10])
+# pred_tst = clf.predict(x_test[0:10])
+# print(pred_tst)
+# prob_tst = clf.predict_proba(x_test[0:10])
+# print(prob_tst)
+
+pred_train = clf.predict(x_train)
+pred_test = clf.predict(x_test)
+prob_train = clf.predict_proba(x_train)
+prob_test = clf.predict_proba(x_test)
+# print(prob_train[0:5])
+# print(pred_train[0:5])
+# print(class_train[0:5])
+
+# Similarities -----------------------------------------------------------
+print("--- SIMILARITIES ---")
+
+response_tfidf_dict = get_response_tfidf_dict(vect)
+
+tfidf_books = get_tfidf_books(vect)
+book_dict = get_book_dict()
+
+book_idx_train = np.array(book_idx_train)
+book_idx_test = np.array(book_idx_test)
+
+response_link_train = np.array(response_link_train)
+response_link_test = np.array(response_link_test)
+
+print(book_idx_test[0:10])
+ex_similarity = cosine_similarity([x_test[example_index]], [tfidf_books[book_dict[book_idx_test[example_index]]]])
+print("Example similarity: ", ex_similarity)
+
+rf_arr_train = []
+for i in range(len(pred_train)):
+    similarity_response = cosine_similarity([x_train[i]], [response_tfidf_dict[response_link_train[i]]])[0][0]
+
+    similarity_book = cosine_similarity([x_train[i]], [tfidf_books[book_dict[book_idx_train[i]]]])[0][0]
+    # rf_arr_train.append([pred_train[i], similarity_book])
+
+    # prob_list = prob_train[i].tolist()
+    # prob_list.append(similarity_response)
+    # prob_list.append(similarity_book)
+    # rf_arr_train.append(prob_list)
+
+    # rf_arr_train.append([pred_train[i], similarity_response])
+    rf_arr_train.append([pred_train[i], similarity_response, similarity_book])
+print(rf_arr_train)
+
+rf_arr_test = []
+for i in range(len(pred_test)):
+    similarity_response = cosine_similarity([x_test[i]], [response_tfidf_dict[response_link_test[i]]])[0][0]
+
+    similarity_book = cosine_similarity([x_test[i]], [tfidf_books[book_dict[book_idx_test[i]]]])[0][0]
+    # rf_arr_test.append([pred_test[i], similarity_book])
+
+    # prob_list = prob_test[i].tolist()
+    # prob_list.append(similarity_response)
+    # prob_list.append(similarity_book)
+    # rf_arr_test.append(prob_list)
+
+    # rf_arr_test.append([pred_test[i], similarity_response])
+    rf_arr_test.append([pred_test[i], similarity_response, similarity_book])
+print(rf_arr_test)
+
+clf_rf = RandomForestClassifier(max_depth=10, random_state=0)
+clf_rf.fit(rf_arr_train, class_train)
+
+# print("True: ", class_test[example_index])
+# print("MLP prediction: ", predictions[example_index])
+# rf_pred_ex = clf_rf.predict([[predictions[example_index], 0]])
+# print("RF prediction:", rf_pred_ex)
+
+rf_pred = clf_rf.predict(rf_arr_test)
+
+print('Classification report - Random forest ---------------------------')
+print(metrics.classification_report(class_test, rf_pred, digits=3))
