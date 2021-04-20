@@ -11,6 +11,7 @@ def remove_stopwords(texts):
         sentences.append(' '.join(without_stopwords))
     return sentences
 
+
 if __name__ == "__main__":
     texts = ["My car is really fast",
              "I like driving cars",
