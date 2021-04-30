@@ -141,3 +141,39 @@ for code in class_test:
 test_dict = collections.OrderedDict(sorted(test_dict.items()))
 print("CREW data - TEST")
 print(test_dict)
+
+# ------------------------ which student was most active ----------------
+print("Pseudonym - CREW")
+crew_pseudonyms = df_crew['Pseudonym']
+
+all_pseudonyms_c = {}
+for code in crew_pseudonyms:
+    # print(code)
+    if code == "\xa0":
+        code = "blank"
+    if code not in all_pseudonyms_c:
+        all_pseudonyms_c[code] = 1
+    else:
+        all_pseudonyms_c[code] += 1
+
+# print(all_pseudonyms_c)
+all_pseudonyms_c = collections.OrderedDict(sorted(all_pseudonyms_c.items(), key=lambda item: item[1], reverse=True))
+print(all_pseudonyms_c)
+
+
+print("Pseudonym - Discussion only")
+discussion_pseudonyms = df_diss['Pseudonym']
+
+all_pseudonyms_d = {}
+for code in discussion_pseudonyms:
+    # print(code)
+    if code == "\xa0":
+        code = "blank"
+    if code not in all_pseudonyms_d:
+        all_pseudonyms_d[code] = 1
+    else:
+        all_pseudonyms_d[code] += 1
+
+# print(all_pseudonyms_d)
+all_pseudonyms_d = collections.OrderedDict(sorted(all_pseudonyms_d.items(), key=lambda item: item[1], reverse=True))
+print(all_pseudonyms_d)

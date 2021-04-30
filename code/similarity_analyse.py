@@ -1,6 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
+import collections
 
 
 def get_response_tfidf_dict(vect_responses):
@@ -63,7 +64,8 @@ if __name__ == "__main__":
     df_responses = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_response)
 
     messages = df_data['Message']
-    classes = df_data['CodePreliminary']
+    # classes = df_data['CodePreliminary']
+    classes = df_data['Pseudonym']
     mes_response_link = df_data['Response Number']
     book_ids = df_data['Book ID']
 
@@ -106,15 +108,19 @@ if __name__ == "__main__":
     index = 0
     sim_dict = {}
     count_dict = {}
+    final_response_id = {}
     for i in range(len(messages)):
         code = classes[i].lower()
         if code[-1] == " ":
             code = code[:-1]
+        if code == "\xa0":
+            code = "blank"
         if code not in class_dict:
             class_dict[code] = index
             index += 1
             sim_dict[code] = 0
             count_dict[code] = 0
+            final_response_id[code] = mes_response_link[i]
         sim_dict[code] = sim_dict[code] + cosine_similarity([tfidf_messages[i]], [response_tfidf_dict[mes_response_link[i]]])[0]
         # print(mes_response_link[i], " - ", response_tfidf_dict[mes_response_link[i]])
         count_dict[code] = count_dict[code] + 1
@@ -124,9 +130,20 @@ if __name__ == "__main__":
 
     print('==============================')
     print("Average similarities (responses):")
+    final_response_pseudonym = {}
     for key in sim_dict:
         sim_dict[key] = sim_dict[key] / count_dict[key]
         print(key, ": ", sim_dict[key])
+        print(key, ": ", final_response_id[key])
+        if final_response_id[key] not in final_response_pseudonym:
+            final_response_pseudonym[final_response_id[key]] = [key, sim_dict[key][0]]
+        else:
+            # print(final_response_pseudonym[final_response_id[key]][1])
+            # print(sim_dict[key][0])
+            if(final_response_pseudonym[final_response_id[key]][1]<sim_dict[key][0]):
+                final_response_pseudonym[final_response_id[key]] = [key, sim_dict[key][0]]
+    final_response_pseudonym = collections.OrderedDict(sorted(final_response_pseudonym.items()))
+    print(final_response_pseudonym)
 
     # print(sim_dict)
 
@@ -148,20 +165,35 @@ if __name__ == "__main__":
     index = 0
     sim_dict = {}
     count_dict = {}
+    final_book_id = {}
     for i in range(len(messages)):
         code = classes[i].lower()
         if code[-1] == " ":
             code = code[:-1]
+        if code == "\xa0":
+            code = "blank"
         if code not in class_dict:
             class_dict[code] = index
             index += 1
             sim_dict[code] = 0
             count_dict[code] = 0
+            final_book_id[code] = book_ids[i]
         sim_dict[code] = sim_dict[code] + cosine_similarity([tfidf_messages[i]], [tfidf_books[book_dict[book_ids[i]]]])[0]
         # print(mes_response_link[i], " - ", response_tfidf_dict[mes_response_link[i]])
         count_dict[code] = count_dict[code] + 1
 
     print("Average similarities (books):")
+    book_pseudonym = {}
     for key in sim_dict:
         sim_dict[key] = sim_dict[key] / count_dict[key]
         print(key, ": ", sim_dict[key])
+        print(key, ": ", final_book_id[key])
+        if final_book_id[key] not in book_pseudonym:
+            book_pseudonym[final_book_id[key]] = [key, sim_dict[key][0]]
+        else:
+            # print(book_pseudonym[final_book_id[key]][1])
+            # print(sim_dict[key][0])
+            if (book_pseudonym[final_book_id[key]][1] < sim_dict[key][0]):
+                book_pseudonym[final_book_id[key]] = [key, sim_dict[key][0]]
+    book_pseudonym = collections.OrderedDict(sorted(book_pseudonym.items()))
+    print(book_pseudonym)
