@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
-from similarity_analyse import get_response_tfidf_dict, get_tfidf_books, get_book_dict
+from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
 
 
 def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_test,

@@ -3,8 +3,8 @@ from sklearn.utils import shuffle
 import pandas as pd
 
 # reading files
-df_crew = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='CREW data')
-df_diss = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='Discussion only data')
+df_crew = pd.read_excel('..\\..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='CREW data')
+df_diss = pd.read_excel('..\\..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name='Discussion only data')
 
 crew_class = df_crew['CodePreliminary']
 crew_message = df_crew['Message']

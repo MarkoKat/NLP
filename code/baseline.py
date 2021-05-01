@@ -1,20 +1,13 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import f_classif
-from sklearn.utils import shuffle
 from sklearn import metrics
 from sklearn.model_selection import StratifiedShuffleSplit
-import collections
-from sklearn import svm
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 from stemming import get_stemms, get_lemmas
 from stop_words import remove_stopwords
-from similarity_analyse import get_response_tfidf_dict, get_tfidf_books, get_book_dict
+from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
 from similarities import use_similarities
 
 
@@ -53,6 +46,8 @@ def get_message_classes(classes_f, class_dict):
 
 
 def remove_small_classes(messages, message_classes, min_number_of_messages):
+    """Remove messages from classes with number of instances smaller than min_number_of_messages"""
+
     all_dict = {}
     for code in message_classes:
         if crew_dict_s[code] not in all_dict:
@@ -199,9 +194,9 @@ if __name__ == "__main__":
 
     # ------------------ TFIDF ----------------------------
 
-    vect = TfidfVectorizer(min_df=2)  # parameters for tokenization, stopwords can be passed
-    tfidf = vect.fit_transform(mes_train)
-    tfidf_test = vect.transform(mes_test)
+    tfidf_vectorizer = TfidfVectorizer(min_df=2)  # parameters for tokenization, stopwords can be passed
+    tfidf = tfidf_vectorizer.fit_transform(mes_train)
+    tfidf_test = tfidf_vectorizer.transform(mes_test)
 
     ti2 = tfidf.T.A
     messages_tfidf = list(map(list, zip(*ti2)))
@@ -209,8 +204,8 @@ if __name__ == "__main__":
     ti3 = tfidf_test.T.A
     tfidf_test = list(map(list, zip(*ti3)))
 
-    print("TF-IDF feature names: ", vect.get_feature_names())
-    print("Number of TF-IDF features: ", len(vect.get_feature_names()))
+    print("TF-IDF feature names: ", tfidf_vectorizer.get_feature_names())
+    print("Number of TF-IDF features: ", len(tfidf_vectorizer.get_feature_names()))
 
     # --------- Select top 'k' of the vectorized features ---------
 
@@ -266,5 +261,6 @@ if __name__ == "__main__":
         pred_train, pred_test = get_predictions(clf, x_train, x_test)
         prob_train, prob_test = get_probabilities(clf, x_train, x_test)
 
-        use_similarities(use_response_similarity, use_book_similarity, vect, x_train, x_test, pred_train, pred_test, class_train, class_test,
+        use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
+                         pred_train, pred_test, class_train, class_test,
                          book_idx_train, book_idx_test, response_link_train, response_link_test)

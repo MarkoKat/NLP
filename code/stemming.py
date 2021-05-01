@@ -45,6 +45,8 @@ def get_lemmas(texts):
 
 
 if __name__ == "__main__":
+    """Just for testing stemming and lemmatisation"""
+
     texts = ["My car is really fast",
              "I like driving cars",
              "This flower are beautiful",
@@ -53,10 +55,10 @@ if __name__ == "__main__":
              "Flowers are my hobby"]
 
     sentences_stem = get_stemms(texts)
-    print(sentences_stem)
+    print("Sentences stemmed: ", sentences_stem)
 
     sentences_lemma = get_lemmas(texts)
-    print(sentences_lemma)
+    print("Sentences lemmatised: ", sentences_lemma)
 
     # TF-IDF -----------------------------------------------------------------------------------------------------------
 
@@ -64,15 +66,15 @@ if __name__ == "__main__":
 
     vect_b = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
     tfidf_messages_b = vect_b.fit_transform(texts)
-    print(vect_b.get_feature_names())
+    print("Basic", vect_b.get_feature_names())
 
     # Stemming
     vect = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
     tfidf_messages = vect.fit_transform(sentences_stem)
-    print(vect.get_feature_names())
+    print("Stemming: ", vect.get_feature_names())
 
     # Lemmatisation
     vect_l = TfidfVectorizer()  # parameters for tokenization, stopwords can be passed
     tfidf_messages_l = vect_l.fit_transform(sentences_lemma)
-    print(vect_l.get_feature_names())
+    print("Lemmatisatin: ", vect_l.get_feature_names())
 
