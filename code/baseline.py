@@ -45,7 +45,7 @@ def get_message_classes(classes_f, class_dict):
     return message_classes
 
 
-def remove_small_classes(messages, message_classes, min_number_of_messages):
+def remove_small_classes(messages, message_classes, min_number_of_messages, crew_dict_s):
     """Remove messages from classes with number of instances smaller than min_number_of_messages"""
 
     all_dict = {}
@@ -102,8 +102,8 @@ def get_probabilities(clf_f, train_data, test_data):
 # ======================================================================================================================
 if __name__ == "__main__":
 
-    sheet = 'crew'
-    # sheet = 'discussion'
+    # sheet = 'crew'
+    sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     message_classes = get_message_classes(classes, class_dict)
 
     # Remove classes with small number of samples
-    messages, message_classes = remove_small_classes(messages, message_classes, 5)
+    messages, message_classes = remove_small_classes(messages, message_classes, 5, crew_dict_s)
 
     # --- Stemming/lemmatisation/stop word removal ------------------------------
 
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     # Stratified split
     message_classes_np = np.array(message_classes)
     for train_index, test_index in sss.split(messages, message_classes):
-        # print("TRAIN:", train_index, "TEST:", test_index)
+        print("TRAIN:", train_index, "TEST:", test_index)
         mes_train, mes_test = messages[train_index], messages[test_index]
         class_train, class_test = message_classes_np[train_index], message_classes_np[test_index]
         if use_book_similarity:
