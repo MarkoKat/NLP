@@ -8,7 +8,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.neural_network import MLPClassifier
 from sklearn import metrics
 
-from baseline import get_class_dict, get_message_classes, remove_small_classes
+from prepare_data import get_data
 
 
 def num_words(tokens):
@@ -75,6 +75,25 @@ def has_question_mark(text):
     return 0
 
 
+def get_feature_vect(message_array):
+    message_feature_vect = []
+    for message in message_array:
+        mes_tokens = word_tokenize(message)
+
+        feature_vect = []
+        feature_vect.append(num_words(mes_tokens))
+        feature_vect.append(frequency5w1h(mes_tokens))
+        feature_vect.append(frequency_upper(message))
+        feature_vect.append(has_link(message))
+        feature_vect.append(is_ok(message))
+        feature_vect.append(is_emoji(message))
+        feature_vect.append(has_emoji(message, mes_tokens))
+        feature_vect.append(has_question_mark(message))
+
+        message_feature_vect.append(feature_vect)
+    return message_feature_vect
+
+
 if __name__ == "__main__":
     print("Test manual features")
 
@@ -106,108 +125,15 @@ if __name__ == "__main__":
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
 
-    # ---------------- Data preparation/pre-processing -----------------------------------------------------------------
-
-    file_name = '..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx'
-
-    if sheet == 'crew':
-        sheet_name = "CREW data"
-    else:
-        sheet_name = "Discussion only data"
-
-    # reading files
-    df_data = pd.read_excel(file_name, sheet_name=sheet_name)
-
-    # column Message
-    messages = df_data['Message']
-
-    # column CodePreliminary
-    classes = df_data['CodePreliminary']
-
-    # Links to responses associated with each message
-    response_link = None
-    if use_response_similarity:
-        response_link = df_data['Response Number']
-
-    # Book id for each message
-    book_ids = None
-    if use_book_similarity:
-        book_ids = df_data['Book ID']
-
-    # ----------------------------------------------------------------------
-    class_dict, crew_dict_s = get_class_dict(classes)
-    print('----------')
-
-    message_classes = get_message_classes(classes, class_dict)
-
-    # Remove classes with small number of samples
-    messages, message_classes = remove_small_classes(messages, message_classes, 5, crew_dict_s)
-
-    # --- Split data to train-test -------------------------------------------
-
-    # preparation of train data
-    mes_train = None
-    class_train = None
-    book_idx_train = None
-    response_link_train = None
-
-    # preparation of test data
-    mes_test = None
-    class_test = None
-    book_idx_test = None
-    response_link_test = None
-
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=10)
-    # print("StratifiedShuffleSplit - n_splits: ", sss.get_n_splits(messages, message_classes))
-
-    # Stratified split
-    message_classes_np = np.array(message_classes)
-    for train_index, test_index in sss.split(messages, message_classes):
-        # print("TRAIN:", train_index, "TEST:", test_index)
-        mes_train, mes_test = messages[train_index], messages[test_index]
-        class_train, class_test = message_classes_np[train_index], message_classes_np[test_index]
-        if use_book_similarity:
-            book_idx_train, book_idx_test = book_ids[train_index], book_ids[test_index]
-        if use_response_similarity:
-            response_link_train, response_link_test = response_link[train_index], response_link[test_index]
+    # Get data
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
+        sheet, use_response_similarity, use_book_similarity)
 
     print("Train length: ", len(class_train), " Test length: ", len(class_test))
 
     # Prepare feature vectors
-    train_vect = []
-    test_vect = []
-
-    for message in mes_train:
-        mes_tokens = word_tokenize(message)
-
-        feature_vect = []
-        feature_vect.append(num_words(mes_tokens))
-        feature_vect.append(frequency5w1h(mes_tokens))
-        feature_vect.append(frequency_upper(message))
-        feature_vect.append(has_link(message))
-        feature_vect.append(is_ok(message))
-        # feature_vect.append(is_emoji(message))
-        # feature_vect.append(has_emoji(message, mes_tokens))
-        feature_vect.append(has_question_mark(message))
-
-        train_vect.append(feature_vect)
-
-    # print(train_vect)
-
-    for message in mes_test:
-        mes_tokens = word_tokenize(message)
-
-        feature_vect = []
-        feature_vect.append(num_words(mes_tokens))
-        feature_vect.append(frequency5w1h(mes_tokens))
-        feature_vect.append(frequency_upper(message))
-        feature_vect.append(has_link(message))
-        feature_vect.append(is_ok(message))
-        # feature_vect.append(is_emoji(message))
-        # feature_vect.append(has_emoji(message, mes_tokens))
-        feature_vect.append(has_question_mark(message))
-
-        test_vect.append(feature_vect)
+    train_vect = get_feature_vect(mes_train)
+    test_vect = get_feature_vect(mes_test)
 
     clf = MLPClassifier(solver='adam', alpha=1e-5, activation='relu', max_iter=5000,
                         hidden_layer_sizes=(20), random_state=1, learning_rate='constant')
