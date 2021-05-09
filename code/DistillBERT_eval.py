@@ -37,9 +37,10 @@ if __name__ == "__main__":
     if 'use_book_similarity' in arguments:
         use_book_similarity = True
 
+    model_name = arguments[1]
     # ---
 
-    PATH = "distill_bert_diss_2.bin"
+    PATH = model_name
 
     # model = DistillBERTClass()
     model = torch.load(PATH)
@@ -134,6 +135,9 @@ if __name__ == "__main__":
 
         pred_train = class_train
         pred_test = predicted_classes
+
+        if len(class_test) % 2 != 0:
+            class_test = class_test[:-1]
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,

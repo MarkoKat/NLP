@@ -81,6 +81,8 @@ if __name__ == "__main__":
     if 'use_book_similarity' in arguments:
         use_book_similarity = True
 
+    model_name = arguments[1]
+
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
         sheet, use_response_similarity, use_book_similarity)
@@ -141,7 +143,7 @@ if __name__ == "__main__":
 
     print(device)
 
-    model.load_state_dict(torch.load('finetuned_BERT_epoch_9.model', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 
     _, predictions, true_vals = evaluate(dataloader_validation)
     # print(predictions)
@@ -163,6 +165,9 @@ if __name__ == "__main__":
 
         pred_train = class_train
         pred_test = idxs
+
+        if len(class_test) % 2 != 0:
+            class_test = class_test[:-1]
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
