@@ -8,6 +8,7 @@ from torch.utils.data import TensorDataset
 from transformers import BertForSequenceClassification
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from sklearn.metrics import f1_score
+import sys
 
 from prepare_data import get_data
 from similarities import use_similarities
@@ -61,11 +62,24 @@ if __name__ == "__main__":
     # device = 'cpu'
     print("Device: ", device)
 
-    sheet = 'crew'
-    # sheet = 'discussion'
+    # sheet = 'crew'
+    sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
-    use_book_similarity = True
+    use_book_similarity = False
+
+    # Read command line arguments
+    arguments = sys.argv
+    print("Arguments: ", arguments)
+
+    if 'crew' in arguments:
+        sheet = 'crew'
+    if 'discussion' in arguments:
+        sheet = 'discussion'
+    if 'use_response_similarity' in arguments:
+        use_response_similarity = True
+    if 'use_book_similarity' in arguments:
+        use_book_similarity = True
 
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
