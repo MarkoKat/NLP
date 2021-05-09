@@ -33,7 +33,7 @@ if __name__ == "__main__":
     sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
-    use_book_similarity = True
+    use_book_similarity = False
 
     # Read command line arguments
     arguments = sys.argv
@@ -121,6 +121,9 @@ if __name__ == "__main__":
 
         pred_train, pred_test = get_predictions(clf, x_train, x_test)
         prob_train, prob_test = get_probabilities(clf, x_train, x_test)
+
+        print(class_test)
+        print(pred_test)
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,

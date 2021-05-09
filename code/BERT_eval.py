@@ -10,6 +10,8 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from sklearn.metrics import f1_score
 
 from prepare_data import get_data
+from similarities import use_similarities
+from tfidf import get_tfidf_vectors
 
 
 def f1_score_func(preds, labels):
@@ -138,3 +140,16 @@ if __name__ == "__main__":
     print(true_vals)
 
     print(metrics.classification_report(true_vals, idxs, digits=3))
+
+    # --- Similarities -----------------------------------------------------------
+    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
+
+    if use_response_similarity or use_book_similarity:
+        print("--- SIMILARITIES ---")
+
+        pred_train = class_train
+        pred_test = idxs
+
+        use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
+                         pred_train, pred_test, class_train, class_test,
+                         book_idx_train, book_idx_test, response_link_train, response_link_test)

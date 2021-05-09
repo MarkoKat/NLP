@@ -8,8 +8,12 @@ from emoji import UNICODE_EMOJI
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.neural_network import MLPClassifier
 from sklearn import metrics
+import sys
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from prepare_data import get_data
+from similarities import use_similarities
+from tfidf import get_tfidf_vectors
 
 
 def num_words(tokens):
@@ -121,11 +125,24 @@ if __name__ == "__main__":
 
     print("---------------------")
 
-    sheet = 'crew'
-    # sheet = 'discussion'
+    # sheet = 'crew'
+    sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
+
+    # Read command line arguments
+    arguments = sys.argv
+    print("Arguments: ", arguments)
+
+    if 'crew' in arguments:
+        sheet = 'crew'
+    if 'discussion' in arguments:
+        sheet = 'discussion'
+    if 'use_response_similarity' in arguments:
+        use_response_similarity = True
+    if 'use_book_similarity' in arguments:
+        use_book_similarity = True
 
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
@@ -148,3 +165,16 @@ if __name__ == "__main__":
 
     print('Classification report ---------------------------')
     print(metrics.classification_report(class_test, predictions, digits=3))
+
+    # --- Similarities -----------------------------------------------------------
+    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
+
+    if use_response_similarity or use_book_similarity:
+        print("--- SIMILARITIES ---")
+
+        pred_train = class_train
+        pred_test = predictions
+
+        use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
+                         pred_train, pred_test, class_train, class_test,
+                         book_idx_train, book_idx_test, response_link_train, response_link_test)

@@ -5,9 +5,12 @@ from transformers import DistilBertModel, DistilBertTokenizer
 
 from torch import cuda
 from sklearn import metrics
+import sys
 
 from prepare_data import get_data
 from DistillBERT import Triage, DistillBERTClass, calcuate_accu
+from similarities import use_similarities
+from tfidf import get_tfidf_vectors
 
 if __name__ == "__main__":
     print("Eval DistillBERT")
@@ -19,7 +22,20 @@ if __name__ == "__main__":
     sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
-    use_book_similarity = True
+    use_book_similarity = False
+
+    # Read command line arguments
+    arguments = sys.argv
+    print("Arguments: ", arguments)
+
+    if 'crew' in arguments:
+        sheet = 'crew'
+    if 'discussion' in arguments:
+        sheet = 'discussion'
+    if 'use_response_similarity' in arguments:
+        use_response_similarity = True
+    if 'use_book_similarity' in arguments:
+        use_book_similarity = True
 
     # ---
 
@@ -109,3 +125,16 @@ if __name__ == "__main__":
     print(f"Test Accuracy: {epoch_accu}")
 
     print(metrics.classification_report(true_classes, predicted_classes, digits=3))
+
+    # --- Similarities -----------------------------------------------------------
+    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
+
+    if use_response_similarity or use_book_similarity:
+        print("--- SIMILARITIES ---")
+
+        pred_train = class_train
+        pred_test = predicted_classes
+
+        use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
+                         pred_train, pred_test, class_train, class_test,
+                         book_idx_train, book_idx_test, response_link_train, response_link_test)
