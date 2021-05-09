@@ -41,7 +41,7 @@ def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_tes
         # prob_list.append(similarity_book)
         # rf_arr_train.append(prob_list)
 
-    print(rf_arr_train)
+    # print(rf_arr_train)
 
     rf_arr_test = []
     for i in range(len(pred_test)):
@@ -63,7 +63,7 @@ def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_tes
         # prob_list.append(similarity_book)
         # rf_arr_test.append(prob_list)
 
-    print(rf_arr_test)
+    # print(rf_arr_test)
 
     clf_rf = RandomForestClassifier(max_depth=10, random_state=0)
 

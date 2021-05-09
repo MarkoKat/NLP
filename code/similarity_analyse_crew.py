@@ -6,7 +6,7 @@ import collections
 
 def get_response_tfidf_dict(vect_responses):
     sheet_name_response = "CREW final responses"
-    df_responses = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx',
+    df_responses = pd.read_excel('../data/Popravki - IMapBook - CREW and discussions dataset.xlsx',
                                  sheet_name=sheet_name_response)
 
     responses = df_responses['Collab Response']
@@ -24,15 +24,15 @@ def get_response_tfidf_dict(vect_responses):
 
 
 def get_tfidf_books(vect_book):
-    with open('..\\data\\ID260 and ID261 - The Lady or the Tiger.txt', 'r', encoding='utf-8') as file:
+    with open('../data/ID260 and ID261 - The Lady or the Tiger.txt', 'r', encoding='utf-8') as file:
         book_260_data = file.read().replace('\n', ' ')
     # print(book_260_data)
 
-    with open('..\\data\\ID264 and ID265 - Just Have Less.txt', 'r', encoding='utf-8') as file:
+    with open('../data/ID264 and ID265 - Just Have Less.txt', 'r', encoding='utf-8') as file:
         book_264_data = file.read().replace('\n', ' ')
     # print(book_264_data)
 
-    with open('..\\data\\ID266 and ID267 - Design for the Future When the Future Is Bleak.txt', 'r', encoding='utf-8') as file:
+    with open('../data/ID266 and ID267 - Design for the Future When the Future Is Bleak.txt', 'r', encoding='utf-8') as file:
         book_266_data = file.read().replace('\n', ' ')
     # print(book_266_data)
 
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     sheet_name_response = "CREW final responses"
 
     # reading files
-    df_data = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_crew)
-    df_responses = pd.read_excel('..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_response)
+    df_data = pd.read_excel('../data/Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_crew)
+    df_responses = pd.read_excel('../data/Popravki - IMapBook - CREW and discussions dataset.xlsx', sheet_name=sheet_name_response)
 
     messages = df_data['Message']
     # classes = df_data['CodePreliminary']

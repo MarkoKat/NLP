@@ -5,6 +5,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import SelectKBest
 from sklearn import metrics
 from sklearn.model_selection import StratifiedShuffleSplit
+import sys
+
 from stemming import get_stemms, get_lemmas
 from stop_words import remove_stopwords
 from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
@@ -31,7 +33,20 @@ if __name__ == "__main__":
     # sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
-    use_book_similarity = False
+    use_book_similarity = True
+
+    # Read command line arguments
+    arguments = sys.argv
+    print("Arguments: ", arguments)
+
+    if 'crew' in arguments:
+        sheet = 'crew'
+    if 'discussion' in arguments:
+        sheet = 'discussion'
+    if 'use_response_similarity' in arguments:
+        use_response_similarity = True
+    if 'use_book_similarity' in arguments:
+        use_book_similarity = True
 
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(sheet, use_response_similarity, use_book_similarity)
@@ -50,7 +65,7 @@ if __name__ == "__main__":
     ti3 = tfidf_test.T.A
     tfidf_test = list(map(list, zip(*ti3)))
 
-    print("TF-IDF feature names: ", tfidf_vectorizer.get_feature_names())
+    # print("TF-IDF feature names: ", tfidf_vectorizer.get_feature_names())
     print("Number of TF-IDF features: ", len(tfidf_vectorizer.get_feature_names()))
 
     # --------- Select top 'k' of the vectorized features ---------
