@@ -82,7 +82,7 @@ def remove_small_classes(messages, message_classes, min_number_of_messages, crew
 def get_data(sheet, use_response_similarity, use_book_similarity):
     # ---------------- Data preparation/pre-processing -----------------------------------------------------------------
 
-    file_name = '..\\data\\Popravki - IMapBook - CREW and discussions dataset.xlsx'
+    file_name = '../data/Popravki - IMapBook - CREW and discussions dataset.xlsx'
 
     if sheet == 'crew':
         sheet_name = "CREW data"

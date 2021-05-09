@@ -1,4 +1,5 @@
 from nltk import word_tokenize
+import nltk
 import re
 import string
 import numpy as np
@@ -96,6 +97,7 @@ def get_feature_vect(message_array):
 
 if __name__ == "__main__":
     print("Test manual features")
+    nltk.download('punkt')
 
     test_text = "Who is in MY ROOM?"
     # test_text = "https://usflearn.instructure.com/courses/1454200/pages/part-2-study-of-online-discussions-deeper-w-slash-less-work-please-open?module_item_id=19552705"
@@ -119,8 +121,8 @@ if __name__ == "__main__":
 
     print("---------------------")
 
-    # sheet = 'crew'
-    sheet = 'discussion'
+    sheet = 'crew'
+    # sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
