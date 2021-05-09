@@ -65,7 +65,7 @@ def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_tes
 
     # print(rf_arr_test)
 
-    clf_rf = RandomForestClassifier(max_depth=10, random_state=0)
+    clf_rf = RandomForestClassifier(max_depth=10, random_state=0, n_estimators=10)
 
     # Train random forest
     clf_rf.fit(rf_arr_train, class_train)

@@ -29,8 +29,8 @@ def get_probabilities(clf_f, train_data, test_data):
 # ======================================================================================================================
 if __name__ == "__main__":
 
-    sheet = 'crew'
-    # sheet = 'discussion'
+    # sheet = 'crew'
+    sheet = 'discussion'
 
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = True
