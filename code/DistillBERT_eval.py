@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import DistilBertModel, DistilBertTokenizer
+from sentence_transformers import SentenceTransformer
 
 from torch import cuda
 from sklearn import metrics
@@ -24,6 +25,8 @@ if __name__ == "__main__":
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
 
+    use_bert = False
+
     # Read command line arguments
     arguments = sys.argv
     print("Arguments: ", arguments)
@@ -36,6 +39,8 @@ if __name__ == "__main__":
         use_response_similarity = True
     if 'use_book_similarity' in arguments:
         use_book_similarity = True
+    if 'use_bert_for_similarity' in arguments:
+        use_bert = True
 
     model_name = arguments[1]
     # ---
@@ -139,6 +144,11 @@ if __name__ == "__main__":
         if len(class_test) % 2 != 0:
             class_test = class_test[:-1]
 
+        if use_bert:
+            bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+            x_train = bert_model.encode(mes_train)
+            x_test = bert_model.encode(mes_test)
+
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, use_bert)

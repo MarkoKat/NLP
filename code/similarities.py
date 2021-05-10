@@ -3,20 +3,31 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
+from similarity_bert import get_response_bert_dict, get_bert_books
+from sentence_transformers import SentenceTransformer
 
 
-def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_test,
-                     class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test):
+def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_test, class_train, class_test,
+                     book_idx_train, book_idx_test, response_link_train, response_link_test, use_bert):
+
+    bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
     if book:
-        tfidf_books = get_tfidf_books(vect)
-        book_dict = get_book_dict()
+        if use_bert:
+            tfidf_books = get_bert_books(bert_model)
+            book_dict = get_book_dict()
+        else:
+            tfidf_books = get_tfidf_books(vect)
+            book_dict = get_book_dict()
 
         book_idx_train = np.array(book_idx_train)
         book_idx_test = np.array(book_idx_test)
 
     if response:
-        response_tfidf_dict = get_response_tfidf_dict(vect)
+        if use_bert:
+            response_tfidf_dict = get_response_bert_dict(bert_model)
+        else:
+            response_tfidf_dict = get_response_tfidf_dict(vect)
 
         response_link_train = np.array(response_link_train)
         response_link_test = np.array(response_link_test)
