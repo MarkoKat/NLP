@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     # Confusion matrix
     class_names = [class_dict[x] for x in list(set(class_test))]
-    get_confusion_matrix(class_test, predicted_classes, class_names)
+    get_confusion_matrix(true_classes, predicted_classes, class_names)
 
     # --- Similarities -----------------------------------------------------------
     x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
