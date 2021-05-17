@@ -136,7 +136,7 @@ if __name__ == "__main__":
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-cased')
 
     # Get data
-    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(sheet, use_response_similarity, use_book_similarity)
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(sheet, use_response_similarity, use_book_similarity)
 
     # intialise data of lists.
     data_train = {'Message': mes_train,

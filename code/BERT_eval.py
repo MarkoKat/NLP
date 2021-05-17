@@ -13,6 +13,7 @@ import sys
 from prepare_data import get_data
 from similarities import use_similarities
 from tfidf import get_tfidf_vectors
+from confusion_matrix import get_confusion_matrix
 
 
 def f1_score_func(preds, labels):
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     model_name = arguments[1]
 
     # Get data
-    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(
         sheet, use_response_similarity, use_book_similarity)
 
     NUM_CLASSES = 16
@@ -157,6 +158,10 @@ if __name__ == "__main__":
 
     print(metrics.classification_report(true_vals, idxs, digits=3))
 
+    # Confusion matrix
+    class_names = [class_dict[x] for x in list(set(class_test))]
+    get_confusion_matrix(class_test, predictions, class_names)
+
     # --- Similarities -----------------------------------------------------------
     x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
@@ -171,4 +176,4 @@ if __name__ == "__main__":
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, class_names)

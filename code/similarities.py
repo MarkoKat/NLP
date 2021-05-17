@@ -3,10 +3,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
+from confusion_matrix import get_confusion_matrix
 
 
 def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_test,
-                     class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test):
+                     class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test,
+                     class_names):
 
     if book:
         tfidf_books = get_tfidf_books(vect)
@@ -76,3 +78,5 @@ def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_tes
     # Evaluation
     print('Classification report - Random forest ---------------------------')
     print(metrics.classification_report(class_test, rf_pred, digits=3))
+
+    get_confusion_matrix(class_test, rf_pred, class_names)

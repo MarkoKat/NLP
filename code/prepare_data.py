@@ -162,4 +162,4 @@ def get_data(sheet, use_response_similarity, use_book_similarity):
         if use_response_similarity:
             response_link_train, response_link_test = response_link[train_index], response_link[test_index]
 
-    return mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test
+    return mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, crew_dict_s

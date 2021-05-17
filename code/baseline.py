@@ -6,12 +6,14 @@ from sklearn.feature_selection import SelectKBest
 from sklearn import metrics
 from sklearn.model_selection import StratifiedShuffleSplit
 import sys
+import time
 
 from stemming import get_stemms, get_lemmas
 from stop_words import remove_stopwords
 from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
 from similarities import use_similarities
 from prepare_data import get_data
+from confusion_matrix import get_confusion_matrix
 
 
 def get_predictions(clf_f, train_data, test_data):
@@ -49,7 +51,7 @@ if __name__ == "__main__":
         use_book_similarity = True
 
     # Get data
-    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(sheet, use_response_similarity, use_book_similarity)
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(sheet, use_response_similarity, use_book_similarity)
 
     print("Train length: ", len(class_train), " Test length: ", len(class_test))
 
@@ -57,13 +59,9 @@ if __name__ == "__main__":
 
     tfidf_vectorizer = TfidfVectorizer(min_df=2)  # parameters for tokenization, stopwords can be passed
     tfidf = tfidf_vectorizer.fit_transform(mes_train)
-    tfidf_test = tfidf_vectorizer.transform(mes_test)
 
     ti2 = tfidf.T.A
     messages_tfidf = list(map(list, zip(*ti2)))
-
-    ti3 = tfidf_test.T.A
-    tfidf_test = list(map(list, zip(*ti3)))
 
     # print("TF-IDF feature names: ", tfidf_vectorizer.get_feature_names())
     print("Number of TF-IDF features: ", len(tfidf_vectorizer.get_feature_names()))
@@ -84,7 +82,6 @@ if __name__ == "__main__":
     #   print(error)
 
     x_train = messages_tfidf
-    x_test = tfidf_test
 
     # ---------------- MLP ----------------------------------------
     clf = MLPClassifier(solver='adam', alpha=1e-5, activation='relu', max_iter=5000,
@@ -97,7 +94,15 @@ if __name__ == "__main__":
     print("Number of iterations: ", clf.n_iter_)
 
     # --- Make predictions ------------------------------------------------
+    start_time = time.time()
+
+    tfidf_test = tfidf_vectorizer.transform(mes_test)
+    ti3 = tfidf_test.T.A
+    tfidf_test = list(map(list, zip(*ti3)))
+    x_test = tfidf_test
+
     predictions = clf.predict(x_test)
+    print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
 
     # print('Predictions:')
     # for p in range(len(predictions)):
@@ -110,8 +115,12 @@ if __name__ == "__main__":
     # print('Confusion matrix --------------------------------')
     # print(metrics.confusion_matrix(class_test, predictions))
 
-    print('Classification report ---------------------------')
+    print('Classification report ---------------------------------')
     print(metrics.classification_report(class_test, predictions, digits=3))
+
+    # Confusion matrix
+    class_names = [class_dict[x] for x in list(set(class_test))]
+    get_confusion_matrix(class_test, predictions, class_names)
 
     # =============================================================================================================
 
@@ -127,4 +136,4 @@ if __name__ == "__main__":
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, class_names)

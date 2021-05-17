@@ -10,10 +10,12 @@ from sklearn.neural_network import MLPClassifier
 from sklearn import metrics
 import sys
 from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.corpus import words
 
 from prepare_data import get_data
 from similarities import use_similarities
 from tfidf import get_tfidf_vectors
+from confusion_matrix import get_confusion_matrix
 
 
 def num_words(tokens):
@@ -80,6 +82,54 @@ def has_question_mark(text):
     return 0
 
 
+def has_exclamation_mark(text):
+    if "!" in text:
+        return 1
+    return 0
+
+
+def frequency_mistakes(tokens):
+    mis_count = 0
+    words_count = 0
+    for token in tokens:
+        if token not in string.punctuation:
+            words_count += 1
+            if token.lower() not in words.words():
+                mis_count += 1
+    if words_count == 0:
+        return 0
+    return mis_count / words_count
+
+
+def max_word_length(tokens):
+    max_len = 0
+    for token in tokens:
+        if len(token) > max_len:
+            max_len = len(token)
+    return max_len
+
+
+def average_word_length(tokens):
+    if len(tokens) == 0:
+        return 0
+    sum_length = 0
+    for token in tokens:
+        sum_length += len(token)
+    return sum_length / len(tokens)
+
+
+def has_greeting(text):
+    if text.lower().startswith("hi") or text.lower().startswith("hello") or text.lower().startswith("good morning"):
+        return 1
+    return 0
+
+
+def has_thank(text):
+    if "thank" in text:
+        return 1
+    return 0
+
+
 def get_feature_vect(message_array):
     message_feature_vect = []
     for message in message_array:
@@ -94,6 +144,12 @@ def get_feature_vect(message_array):
         feature_vect.append(is_emoji(message))
         feature_vect.append(has_emoji(message, mes_tokens))
         feature_vect.append(has_question_mark(message))
+        feature_vect.append(has_exclamation_mark(message))
+        # feature_vect.append(frequency_mistakes(mes_tokens))
+        feature_vect.append(max_word_length(mes_tokens))
+        feature_vect.append(average_word_length(mes_tokens))
+        feature_vect.append(has_greeting(message))
+        feature_vect.append(has_thank(message))
 
         message_feature_vect.append(feature_vect)
     return message_feature_vect
@@ -103,7 +159,7 @@ if __name__ == "__main__":
     print("Test manual features")
     nltk.download('punkt')
 
-    test_text = "Who is in MY ROOM?"
+    test_text = "Who is in MY ROOM rroom?"
     # test_text = "https://usflearn.instructure.com/courses/1454200/pages/part-2-study-of-online-discussions-deeper-w-slash-less-work-please-open?module_item_id=19552705"
     # test_text = "OK, "
     # test_text = "heh 👍"
@@ -114,16 +170,19 @@ if __name__ == "__main__":
     test_tokens = word_tokenize(test_text)
     print(test_tokens)
 
-    print("num_words: ", num_words(test_tokens))
-    print("frequency5w1h: ", frequency5w1h(test_tokens))
-    print("frequency_upper: ", frequency_upper(test_text))
-    print("has_link: ", has_link(test_text))
-    print("is_ok: ", is_ok(test_text))
-    print("is_emoji: ", is_emoji(test_text))
-    print("has_emoji: ", has_emoji(test_text, test_tokens))
-    print("has_question_mark: ", has_question_mark(test_text))
-
-    print("---------------------")
+    # print("num_words: ", num_words(test_tokens))
+    # print("frequency5w1h: ", frequency5w1h(test_tokens))
+    # print("frequency_upper: ", frequency_upper(test_text))
+    # print("has_link: ", has_link(test_text))
+    # print("is_ok: ", is_ok(test_text))
+    # print("is_emoji: ", is_emoji(test_text))
+    # print("has_emoji: ", has_emoji(test_text, test_tokens))
+    # print("has_question_mark: ", has_question_mark(test_text))
+    # print("frequency_mistakes: ", frequency_mistakes(test_tokens))
+    # print("max_word_length: ", max_word_length(test_tokens))
+    # print("average_word_length: ", average_word_length(test_tokens))
+    #
+    # print("---------------------")
 
     # sheet = 'crew'
     sheet = 'discussion'
@@ -145,7 +204,7 @@ if __name__ == "__main__":
         use_book_similarity = True
 
     # Get data
-    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(
         sheet, use_response_similarity, use_book_similarity)
 
     print("Train length: ", len(class_train), " Test length: ", len(class_test))
@@ -166,6 +225,10 @@ if __name__ == "__main__":
     print('Classification report ---------------------------')
     print(metrics.classification_report(class_test, predictions, digits=3))
 
+    # Confusion matrix
+    class_names = [class_dict[x] for x in list(set(class_test))]
+    get_confusion_matrix(class_test, predictions, class_names)
+
     # --- Similarities -----------------------------------------------------------
     x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
@@ -177,4 +240,4 @@ if __name__ == "__main__":
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, class_names)

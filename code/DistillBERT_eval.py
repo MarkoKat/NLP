@@ -11,6 +11,7 @@ from prepare_data import get_data
 from DistillBERT import Triage, DistillBERTClass, calcuate_accu
 from similarities import use_similarities
 from tfidf import get_tfidf_vectors
+from confusion_matrix import get_confusion_matrix
 
 if __name__ == "__main__":
     print("Eval DistillBERT")
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-cased')
 
     # Get data
-    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test = get_data(sheet, use_response_similarity, use_book_similarity)
+    mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(sheet, use_response_similarity, use_book_similarity)
 
     # intialise data of lists.
     data_test = {'Message': mes_test,
@@ -127,6 +128,10 @@ if __name__ == "__main__":
 
     print(metrics.classification_report(true_classes, predicted_classes, digits=3))
 
+    # Confusion matrix
+    class_names = [class_dict[x] for x in list(set(class_test))]
+    get_confusion_matrix(class_test, predicted_classes, class_names)
+
     # --- Similarities -----------------------------------------------------------
     x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
@@ -141,4 +146,4 @@ if __name__ == "__main__":
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, class_names)
