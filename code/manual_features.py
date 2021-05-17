@@ -11,6 +11,7 @@ from sklearn import metrics
 import sys
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import words
+from sentence_transformers import SentenceTransformer
 
 from prepare_data import get_data
 from similarities import use_similarities
@@ -190,6 +191,8 @@ if __name__ == "__main__":
     use_response_similarity = False  # Can't use with discussion
     use_book_similarity = False
 
+    use_bert = False
+
     # Read command line arguments
     arguments = sys.argv
     print("Arguments: ", arguments)
@@ -202,6 +205,8 @@ if __name__ == "__main__":
         use_response_similarity = True
     if 'use_book_similarity' in arguments:
         use_book_similarity = True
+    if 'use_bert_for_similarity' in arguments:
+        use_bert = True
 
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(
@@ -238,6 +243,11 @@ if __name__ == "__main__":
         pred_train = class_train
         pred_test = predictions
 
+        if use_bert:
+            bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+            x_train = bert_model.encode(mes_train)
+            x_test = bert_model.encode(mes_test)
+
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
-                         book_idx_train, book_idx_test, response_link_train, response_link_test, class_names)
+                         book_idx_train, book_idx_test, response_link_train, response_link_test, use_bert, class_names)
