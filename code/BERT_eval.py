@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from sklearn.metrics import f1_score
 from sentence_transformers import SentenceTransformer
 import sys
+import time
 
 from prepare_data import get_data
 from similarities import use_similarities
@@ -124,20 +125,9 @@ if __name__ == "__main__":
         max_length=256,
         return_tensors='pt'
     )
-
-    input_ids_val = encoded_data_val['input_ids']
-    attention_masks_val = encoded_data_val['attention_mask']
-    labels_val = torch.tensor(test_dataset.label.values)
-
-    dataset_val = TensorDataset(input_ids_val, attention_masks_val, labels_val)
-
     # -------
 
     batch_size = 3
-
-    dataloader_validation = DataLoader(dataset_val,
-                                       sampler=SequentialSampler(dataset_val),
-                                       batch_size=batch_size)
 
     model = BertForSequenceClassification.from_pretrained("bert-base-uncased",
                                                           num_labels=NUM_CLASSES,
@@ -151,12 +141,27 @@ if __name__ == "__main__":
 
     model.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 
+    # Predictions
+    start_time = time.time()
+    input_ids_val = encoded_data_val['input_ids']
+    attention_masks_val = encoded_data_val['attention_mask']
+    labels_val = torch.tensor(test_dataset.label.values)
+
+    dataset_val = TensorDataset(input_ids_val, attention_masks_val, labels_val)
+
+    dataloader_validation = DataLoader(dataset_val,
+                                       sampler=SequentialSampler(dataset_val),
+                                       batch_size=batch_size)
+
     _, predictions, true_vals = evaluate(dataloader_validation)
     # print(predictions)
     idxs = []
     predictions = predictions.tolist()
     for el in predictions:
         idxs.append(el.index(max(el)))
+
+    print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
+
     print(idxs)
     true_vals = true_vals.tolist()
     print(true_vals)

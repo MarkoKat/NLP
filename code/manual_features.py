@@ -2,16 +2,13 @@ from nltk import word_tokenize
 import nltk
 import re
 import string
-import numpy as np
-import pandas as pd
 from emoji import UNICODE_EMOJI
-from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.neural_network import MLPClassifier
 from sklearn import metrics
 import sys
-from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import words
 from sentence_transformers import SentenceTransformer
+import time
 
 from prepare_data import get_data
 from similarities import use_similarities
@@ -216,7 +213,6 @@ if __name__ == "__main__":
 
     # Prepare feature vectors
     train_vect = get_feature_vect(mes_train)
-    test_vect = get_feature_vect(mes_test)
 
     clf = MLPClassifier(solver='adam', alpha=1e-5, activation='relu', max_iter=5000,
                         hidden_layer_sizes=(20), random_state=1, learning_rate='constant')
@@ -224,6 +220,11 @@ if __name__ == "__main__":
     # Train MLP
     clf.fit(train_vect, class_train)
     print("Number of iterations: ", clf.n_iter_)
+
+    # Predictions
+    start_time = time.time()
+    test_vect = get_feature_vect(mes_test)
+    print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
 
     predictions = clf.predict(test_vect)
 

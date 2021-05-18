@@ -7,6 +7,7 @@ from sentence_transformers import SentenceTransformer
 from torch import cuda
 from sklearn import metrics
 import sys
+import time
 
 from prepare_data import get_data
 from DistillBERT import Triage, DistillBERTClass, calcuate_accu
@@ -75,6 +76,11 @@ if __name__ == "__main__":
 
     print("TEST Dataset: {}".format(test_dataset.shape))
 
+    # Creating the loss function
+    loss_function = torch.nn.CrossEntropyLoss()
+
+    # Predictions - Evalvacija
+    start_time = time.time()
     testing_set = Triage(test_dataset, tokenizer, MAX_LEN)
 
     test_params = {'batch_size': VALID_BATCH_SIZE,
@@ -83,10 +89,6 @@ if __name__ == "__main__":
 
     testing_loader = DataLoader(testing_set, **test_params)
 
-    # Creating the loss function
-    loss_function = torch.nn.CrossEntropyLoss()
-
-    # Evalvacija
     true_classes = []
     predicted_classes = []
 
@@ -121,6 +123,8 @@ if __name__ == "__main__":
 
             nb_tr_steps += 1
             nb_tr_examples += targets.size(0)
+
+    print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
 
     epoch_loss = tr_loss / nb_tr_steps
     epoch_accu = (n_correct * 100) / nb_tr_examples
