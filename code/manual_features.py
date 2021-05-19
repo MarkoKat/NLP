@@ -128,7 +128,7 @@ def has_thank(text):
     return 0
 
 
-def get_feature_vect(message_array):
+def get_feature_vect(message_array, reduced_set):
     message_feature_vect = []
     for message in message_array:
         mes_tokens = word_tokenize(message)
@@ -139,10 +139,12 @@ def get_feature_vect(message_array):
         feature_vect.append(frequency_upper(message))
         feature_vect.append(has_link(message))
         feature_vect.append(is_ok(message))
-        feature_vect.append(is_emoji(message))
-        feature_vect.append(has_emoji(message, mes_tokens))
+        if not reduced_set:
+            feature_vect.append(is_emoji(message))
+            feature_vect.append(has_emoji(message, mes_tokens))
         feature_vect.append(has_question_mark(message))
-        feature_vect.append(has_exclamation_mark(message))
+        if not reduced_set:
+            feature_vect.append(has_exclamation_mark(message))
         # feature_vect.append(frequency_mistakes(mes_tokens))
         feature_vect.append(max_word_length(mes_tokens))
         feature_vect.append(average_word_length(mes_tokens))
@@ -164,6 +166,7 @@ if __name__ == "__main__":
     use_book_similarity = False
 
     use_bert = False
+    reduced_feature_set = False
 
     # Read command line arguments
     arguments = sys.argv
@@ -179,6 +182,8 @@ if __name__ == "__main__":
         use_book_similarity = True
     if 'use_bert_for_similarity' in arguments:
         use_bert = True
+    if 'reduced_feature_set' in arguments:
+        reduced_feature_set = True
 
     # Get data
     mes_train, mes_test, class_train, class_test, book_idx_train, book_idx_test, response_link_train, response_link_test, class_dict = get_data(
@@ -187,7 +192,7 @@ if __name__ == "__main__":
     print("Train length: ", len(class_train), " Test length: ", len(class_test))
 
     # Prepare feature vectors
-    train_vect = get_feature_vect(mes_train)
+    train_vect = get_feature_vect(mes_train, reduced_feature_set)
 
     clf = MLPClassifier(solver='adam', alpha=1e-5, activation='relu', max_iter=5000,
                         hidden_layer_sizes=(20), random_state=1, learning_rate='constant')
@@ -198,7 +203,7 @@ if __name__ == "__main__":
 
     # Predictions
     start_time = time.time()
-    test_vect = get_feature_vect(mes_test)
+    test_vect = get_feature_vect(mes_test, reduced_feature_set)
     print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
 
     predictions = clf.predict(test_vect)
