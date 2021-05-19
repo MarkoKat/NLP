@@ -11,7 +11,6 @@ import time
 
 from stemming import get_stemms, get_lemmas
 from stop_words import remove_stopwords
-from similarity_analyse_crew import get_response_tfidf_dict, get_tfidf_books, get_book_dict
 from similarities import use_similarities
 from prepare_data import get_data
 from confusion_matrix import get_confusion_matrix
@@ -31,6 +30,7 @@ def get_probabilities(clf_f, train_data, test_data):
 
 # ======================================================================================================================
 if __name__ == "__main__":
+    print("--- TF-IDF ---")
 
     # sheet = 'crew'
     sheet = 'discussion'
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     # Train MLP
     clf.fit(x_train, class_train)
-    print("Number of iterations: ", clf.n_iter_)
+    # print("Number of iterations: ", clf.n_iter_)
 
     # --- Make predictions ------------------------------------------------
     start_time = time.time()
@@ -120,8 +120,8 @@ if __name__ == "__main__":
     # print('Confusion matrix --------------------------------')
     # print(metrics.confusion_matrix(class_test, predictions))
 
-    print('Classification report ---------------------------------')
-    print(metrics.classification_report(class_test, predictions, digits=3))
+    print('Classification report (TF-IDF + MLP) ---------------------------------')
+    print(metrics.classification_report(class_test, predictions, digits=3, zero_division=0))
 
     # Confusion matrix
     class_names = [class_dict[x] for x in list(set(class_test))]
@@ -135,16 +135,18 @@ if __name__ == "__main__":
 
         pred_train, pred_test = get_predictions(clf, x_train, x_test)
         prob_train, prob_test = get_probabilities(clf, x_train, x_test)
-
         # pred_train = class_train
 
         # print(class_test)
         # print(pred_test)
 
         if use_bert:
+            print("Use BERT embeddings for similarity")
             bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
             x_train = bert_model.encode(mes_train)
             x_test = bert_model.encode(mes_test)
+        else:
+            print("Use TF-IDF vectors for similarity")
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,

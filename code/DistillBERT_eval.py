@@ -12,11 +12,11 @@ import time
 from prepare_data import get_data
 from DistillBERT import Triage, DistillBERTClass, calcuate_accu
 from similarities import use_similarities
-from tfidf import get_tfidf_vectors
+from tfidf_helper import get_tfidf_vectors
 from confusion_matrix import get_confusion_matrix
 
 if __name__ == "__main__":
-    print("Eval DistillBERT")
+    print("--- DistilBERT ---")
 
     device = 'cuda' if cuda.is_available() else 'cpu'
     print("Device: ", device)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     if len(test_dataset) % 2 != 0:
         test_dataset = test_dataset[:-1]
 
-    print("TEST Dataset: {}".format(test_dataset.shape))
+    # print("TEST Dataset: {}".format(test_dataset.shape))
 
     # Creating the loss function
     loss_function = torch.nn.CrossEntropyLoss()
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     testing_set = Triage(test_dataset, tokenizer, MAX_LEN)
 
     test_params = {'batch_size': VALID_BATCH_SIZE,
-                   'shuffle': True,
+                   'shuffle': False,
                    'num_workers': 0}
 
     testing_loader = DataLoader(testing_set, **test_params)
@@ -129,34 +129,38 @@ if __name__ == "__main__":
     epoch_loss = tr_loss / nb_tr_steps
     epoch_accu = (n_correct * 100) / nb_tr_examples
 
-    print(true_classes)
-    print(predicted_classes)
+    # print(true_classes)
+    # print(predicted_classes)
 
     # print(f"Validation Loss Epoch: {epoch_loss}")
-    print(f"Test Accuracy: {epoch_accu}")
+    # print(f"Test Accuracy: {epoch_accu}")
 
-    print(metrics.classification_report(true_classes, predicted_classes, digits=3))
+    print('Classification report (DistilBERT) ---------------------------')
+    print(metrics.classification_report(true_classes, predicted_classes, digits=3, zero_division=0))
 
     # Confusion matrix
     class_names = [class_dict[x] for x in list(set(class_test))]
     get_confusion_matrix(true_classes, predicted_classes, class_names)
 
     # --- Similarities -----------------------------------------------------------
-    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
-
     if use_response_similarity or use_book_similarity:
         print("--- SIMILARITIES ---")
 
         pred_train = class_train
         pred_test = predicted_classes
+        tfidf_vectorizer = None
 
         if len(class_test) % 2 != 0:
             class_test = class_test[:-1]
 
         if use_bert:
+            print("Use BERT embeddings for similarity")
             bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
             x_train = bert_model.encode(mes_train)
             x_test = bert_model.encode(mes_test)
+        else:
+            print("Use TF-IDF vectors for similarity")
+            x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,

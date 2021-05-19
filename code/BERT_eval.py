@@ -9,12 +9,13 @@ from transformers import BertForSequenceClassification
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from sklearn.metrics import f1_score
 from sentence_transformers import SentenceTransformer
+import warnings
 import sys
 import time
 
 from prepare_data import get_data
 from similarities import use_similarities
-from tfidf import get_tfidf_vectors
+from tfidf_helper import get_tfidf_vectors
 from confusion_matrix import get_confusion_matrix
 
 
@@ -59,11 +60,7 @@ def evaluate(dataloader_val):
 
 
 if __name__ == "__main__":
-    print("Run BERT exp")
-
-    device = 'cuda' if cuda.is_available() else 'cpu'
-    # device = 'cpu'
-    print("Device: ", device)
+    print("--- BERT ---")
 
     # sheet = 'crew'
     sheet = 'discussion'
@@ -88,6 +85,8 @@ if __name__ == "__main__":
     if 'use_bert_for_similarity' in arguments:
         use_bert = True
 
+    # warnings.filterwarnings("ignore")
+
     model_name = arguments[1]
 
     # Get data
@@ -99,8 +98,7 @@ if __name__ == "__main__":
         NUM_CLASSES = 9
     # ---
 
-    # intialise data of lists.
-
+    # initialise data of lists.
     data_test = {'Title': mes_test,
                  'label': class_test}
 
@@ -112,7 +110,7 @@ if __name__ == "__main__":
     if len(test_dataset) % 2 != 0:
         test_dataset = test_dataset[:-1]
 
-    print("TEST Dataset: {}".format(test_dataset.shape))
+    # print("TEST Dataset: {}".format(test_dataset.shape))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased',
                                               do_lower_case=True)
@@ -136,8 +134,7 @@ if __name__ == "__main__":
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
-
-    print(device)
+    print("Device: ", device)
 
     model.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 
@@ -162,32 +159,37 @@ if __name__ == "__main__":
 
     print("--- Evaluation time: %s seconds ---" % (time.time() - start_time))
 
-    print(idxs)
+    # print(idxs)
     true_vals = true_vals.tolist()
-    print(true_vals)
+    # print(true_vals)
 
-    print(metrics.classification_report(true_vals, idxs, digits=3))
+    print('Classification report (BERT) ---------------------------')
+    print(metrics.classification_report(true_vals, idxs, digits=3, zero_division=0))
 
     # Confusion matrix
     class_names = [class_dict[x] for x in list(set(class_test))]
     get_confusion_matrix(true_vals, idxs, class_names)
 
     # --- Similarities -----------------------------------------------------------
-    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
     if use_response_similarity or use_book_similarity:
         print("--- SIMILARITIES ---")
 
         pred_train = class_train
         pred_test = idxs
+        tfidf_vectorizer = None
 
         if len(class_test) % 2 != 0:
             class_test = class_test[:-1]
 
         if use_bert:
+            print("Use BERT embeddings for similarity")
             bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
             x_train = bert_model.encode(mes_train)
             x_test = bert_model.encode(mes_test)
+        else:
+            print("Use TF-IDF vectors for similarity")
+            x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,

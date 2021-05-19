@@ -12,7 +12,7 @@ import time
 
 from prepare_data import get_data
 from similarities import use_similarities
-from tfidf import get_tfidf_vectors
+from tfidf_helper import get_tfidf_vectors
 from confusion_matrix import get_confusion_matrix
 
 

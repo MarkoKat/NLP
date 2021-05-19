@@ -12,7 +12,7 @@ def get_tfidf_vectors(mes_train, mes_test):
     tfidf_test = list(map(list, zip(*ti3)))
 
     # print("TF-IDF feature names: ", tfidf_vectorizer.get_feature_names())
-    print("Number of TF-IDF features: ", len(tfidf_vectorizer.get_feature_names()))
+    # print("Number of TF-IDF features: ", len(tfidf_vectorizer.get_feature_names()))
 
     x_train = messages_tfidf
     x_test = tfidf_test
