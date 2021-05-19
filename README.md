@@ -17,7 +17,7 @@ Parametri, ki se uporabljajo pri vseh štirih algoritmih:
 - `crew` ali `discussion`: uporaba sporočil iz zavihka CREW ali Discussion only
 - `use_book_similarity`: uporaba podobnosti sporočil z besedilom knjige
 - `use_response_similarity`: uporaba podobnosti sporočil s skupnim končnim odgovorom (uporaba mogoča samo v kombinaciji s poročili iz zavihka CREW)
-- `use_bert_for_similarity`: uporaba BERT vektorskih vložitev za računanje podobnosti besedil. Provzeto se uporabijo TF-IDF vektorji.
+- `use_bert_for_similarity`: uporaba BERT vektorskih vložitev za računanje podobnosti besedil. Privzeto se uporabijo TF-IDF vektorji.
 
 Pripravila sva Google Colab beležnico v kateri so že pripravljeni vsi koraki za zagon kode za evalvacijo algoritmov: [LINK]
 
