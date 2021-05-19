@@ -86,7 +86,7 @@ def use_similarities(response, book, vect, x_train, x_test, pred_train, pred_tes
     rf_pred = clf_rf.predict(rf_arr_test)
 
     # Evaluation
-    print('Classification report - Random forest ---------------------------')
-    print(metrics.classification_report(class_test, rf_pred, digits=3))
+    print('Classification report - similarities were used ---------------------------')
+    print(metrics.classification_report(class_test, rf_pred, digits=3, zero_division=0))
 
     get_confusion_matrix(class_test, rf_pred, class_names)

@@ -15,8 +15,8 @@ def get_class_dict(classes_f):
             class_dict[code] = index
             index += 1
 
-    print('Classes:')
-    print(class_dict)
+    # print('Classes:')
+    # print(class_dict)
 
     # Switch keys and values in dict
     crew_dict_s = {y: x for x, y in class_dict.items()}
@@ -58,9 +58,8 @@ def remove_small_classes(messages, message_classes, min_number_of_messages, crew
             del all_dict[key]
             del_keys.append(key)
 
-    print('Delete keys list: ', del_keys)
-
-    print("Data length: ", len(message_classes), " - ", len(messages))
+    # print('Delete keys list: ', del_keys)
+    # print("Data length: ", len(message_classes), " - ", len(messages))
 
     messages_np = np.array(messages)
     for i in range(len(message_classes)):
@@ -75,7 +74,7 @@ def remove_small_classes(messages, message_classes, min_number_of_messages, crew
     message_classes = list(filter(lambda a: a is not None, message_classes))
     messages = list(filter(lambda a: a is not None, messages_np))
     messages = np.array(messages)
-    print("Data length (after removal): ", len(message_classes), " - ", len(messages))
+    # print("Data length (after removal): ", len(message_classes), " - ", len(messages))
     return messages, message_classes
 
 
@@ -110,7 +109,6 @@ def get_data(sheet, use_response_similarity, use_book_similarity):
 
     # ----------------------------------------------------------------------
     class_dict, crew_dict_s = get_class_dict(classes)
-    print('----------')
 
     message_classes = get_message_classes(classes, class_dict)
 

@@ -154,33 +154,8 @@ def get_feature_vect(message_array):
 
 
 if __name__ == "__main__":
-    print("Test manual features")
+    print("--- Manual features ---")
     nltk.download('punkt')
-
-    test_text = "Who is in MY ROOM rroom?"
-    # test_text = "https://usflearn.instructure.com/courses/1454200/pages/part-2-study-of-online-discussions-deeper-w-slash-less-work-please-open?module_item_id=19552705"
-    # test_text = "OK, "
-    # test_text = "heh 👍"
-    # test_text = "Erica :D"
-    # test_text = "Erica <3"
-
-    print(test_text)
-    test_tokens = word_tokenize(test_text)
-    print(test_tokens)
-
-    # print("num_words: ", num_words(test_tokens))
-    # print("frequency5w1h: ", frequency5w1h(test_tokens))
-    # print("frequency_upper: ", frequency_upper(test_text))
-    # print("has_link: ", has_link(test_text))
-    # print("is_ok: ", is_ok(test_text))
-    # print("is_emoji: ", is_emoji(test_text))
-    # print("has_emoji: ", has_emoji(test_text, test_tokens))
-    # print("has_question_mark: ", has_question_mark(test_text))
-    # print("frequency_mistakes: ", frequency_mistakes(test_tokens))
-    # print("max_word_length: ", max_word_length(test_tokens))
-    # print("average_word_length: ", average_word_length(test_tokens))
-    #
-    # print("---------------------")
 
     # sheet = 'crew'
     sheet = 'discussion'
@@ -219,7 +194,7 @@ if __name__ == "__main__":
 
     # Train MLP
     clf.fit(train_vect, class_train)
-    print("Number of iterations: ", clf.n_iter_)
+    # print("Number of iterations: ", clf.n_iter_)
 
     # Predictions
     start_time = time.time()
@@ -228,26 +203,31 @@ if __name__ == "__main__":
 
     predictions = clf.predict(test_vect)
 
-    print('Classification report ---------------------------')
-    print(metrics.classification_report(class_test, predictions, digits=3))
+    print('Classification report (Manual features + MLP) ---------------------------')
+    print(metrics.classification_report(class_test, predictions, digits=3, zero_division=0))
 
     # Confusion matrix
     class_names = [class_dict[x] for x in list(set(class_test))]
     get_confusion_matrix(class_test, predictions, class_names)
 
     # --- Similarities -----------------------------------------------------------
-    x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
     if use_response_similarity or use_book_similarity:
-        print("--- SIMILARITIES ---")
+        print("--- USE SIMILARITIES ---")
 
         pred_train = class_train
         pred_test = predictions
 
+        tfidf_vectorizer = None
+
         if use_bert:
+            print("Use BERT embeddings for similarity")
             bert_model = SentenceTransformer('bert-base-nli-mean-tokens')
             x_train = bert_model.encode(mes_train)
             x_test = bert_model.encode(mes_test)
+        else:
+            print("Use TF-IDF vectors for similarity")
+            x_train, x_test, tfidf_vectorizer = get_tfidf_vectors(mes_train, mes_test)
 
         use_similarities(use_response_similarity, use_book_similarity, tfidf_vectorizer, x_train, x_test,
                          pred_train, pred_test, class_train, class_test,
