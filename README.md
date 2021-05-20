@@ -43,7 +43,8 @@ Parametri, ki se uporabljajo pri zagonu vseh štirih algoritmov:
 - `use_response_similarity`: uporaba podobnosti sporočil s skupnim končnim odgovorom (uporaba mogoča samo v kombinaciji s poročili iz zavihka CREW)
 - `use_bert_for_similarity`: uporaba BERT vektorskih vložitev za računanje podobnosti besedil. Privzeto se uporabijo TF-IDF vektorji.
 
-Pripravila sva Google Colab beležnico v kateri so že pripravljeni vsi koraki za zagon kode za evalvacijo algoritmov: [LINK]
+Pripravila sva Google Colab beležnico v kateri so že pripravljeni vsi koraki za zagon kode za evalvacijo algoritmov: 
+https://colab.research.google.com/drive/1dxdGSrOzjdY71Eyg4n9-zYCDZhDxinmq?usp=sharing
 
 ### Ročne značilke + MLP
 
