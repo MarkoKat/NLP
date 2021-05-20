@@ -103,7 +103,7 @@ Dodatni paramater:
 - Prvi paramater mora biti ime modela - v primeru že pripravljenih modelov `distill_bert_crew_14.bin` ali `distill_bert_discussion_10.bin`
 
 Povezave do modelov:
-- CREW: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
+- CREW: https://drive.google.com/file/d/1667DufLncZIYKBk_j4NikFWp8BDyvVsf/view?usp=sharing
 - Discussion: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
 
 ```
