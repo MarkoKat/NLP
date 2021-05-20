@@ -9,7 +9,7 @@ V zbirki ima vsako sporočilo določen razred, kot na primer "content discussion
 "emoticon/non-verbal",...
 
 Za klasifikacijo sva preizkusila štiri metode:
-- Nabor ročno pridobljenih značilk v kombinaciji z MLP (Multi Layer Perceptron) klasifikatorjem
+- Nabor ročno pridobljenih značilk v kombinaciji z MLP (MultiLayer Perceptron) klasifikatorjem
 - TF-IDF vektorji v kombinaciji z MLP klasifikatorjem
 - BERT
 - DistilBERT (prečiščena različica modela BERT - manjši modeli in hitrejše izvajanje)
