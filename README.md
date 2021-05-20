@@ -77,17 +77,6 @@ Zagon brez uporabe podobnosti:
 python tf_idf.py <crew/discussion>
 ```
 
-### Zagon z uporabo podobnosti
-
-Za zagon z uporabo podobnosti pri katerikoli metodi po želji dodamo še paramatre `use_book_similarity`, 
-`use_response_similarity`, `use_bert_for_similarity`.
-
-Primer:
-
-```
-python manual_features.py crew use_book_similarity use_bert_for_similarity
-```
-
 ### BERT
 
 Dodatni paramater:
@@ -124,6 +113,17 @@ python DistillBERT.py <ime_modela> <crew/discussion>
 Primer:
 ```
 python DistillBERT.py distill_bert_crew_14.bin crew
+```
+
+### Zagon z uporabo podobnosti
+
+Za zagon z uporabo podobnosti pri katerikoli metodi po želji dodamo še paramatre `use_book_similarity`, 
+`use_response_similarity`, `use_bert_for_similarity`.
+
+Primer:
+
+```
+python manual_features.py crew use_book_similarity use_bert_for_similarity
 ```
 
 ### Analiza podatkov
