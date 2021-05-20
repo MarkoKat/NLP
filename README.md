@@ -89,12 +89,12 @@ Povezave do modelov:
 Zagon brez uporabe podobnosti:
 
 ```
-python BERT.py <ime_modela> <crew/discussion>
+python BERT_eval.py <ime_modela> <crew/discussion>
 ```
 
 Primer:
 ```
-python BERT.py BERT_crew_13.model crew
+python BERT_eval.py BERT_crew_13.model crew
 ```
 
 ### DistilBERT
@@ -107,12 +107,12 @@ Povezave do modelov:
 - Discussion: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
 
 ```
-python DistillBERT.py <ime_modela> <crew/discussion>
+python DistillBERT_eval.py <ime_modela> <crew/discussion>
 ```
 
 Primer:
 ```
-python DistillBERT.py distill_bert_crew_14.bin crew
+python DistillBERT_eval.py distill_bert_crew_14.bin crew
 ```
 
 ### Zagon z uporabo podobnosti
