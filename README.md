@@ -49,7 +49,7 @@ https://colab.research.google.com/drive/1dxdGSrOzjdY71Eyg4n9-zYCDZhDxinmq?usp=sh
 ### Ročne značilke + MLP
 
 Dodatni parameter:
-- `reduced_feature_set`: zmanjšan nabor značilk (brez upoštevanja prisotnosti emotikono in klicajev) s katerim je bil dosežen
+- `reduced_feature_set`: zmanjšan nabor značilk (brez upoštevanja prisotnosti emotikonov in klicajev) s katerim je bil dosežen
 boljši rezultat za sporočila iz zavihka Discussion only.
 
 Zagon brez uporabe podobnosti:
