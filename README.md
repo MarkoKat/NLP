@@ -87,7 +87,7 @@ Povezave do modelov:
 - CREW: https://drive.google.com/file/d/135esHSqF0sg1-_9sLqG1KDEgncS2PZE-/view?usp=sharing
 - Discussion: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
 
-Zagon brez uporabe podobnosti:
+Zagon brez uporabe podobnosti (priporočena je uporaba CUDA-e):
 
 ```
 python BERT_eval.py <ime_modela> <crew/discussion>
@@ -106,6 +106,8 @@ Dodatni paramater:
 Povezave do modelov:
 - CREW: https://drive.google.com/file/d/1667DufLncZIYKBk_j4NikFWp8BDyvVsf/view?usp=sharing
 - Discussion: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
+
+Zagon (priporočena je uporaba CUDA-e):
 
 ```
 python DistillBERT_eval.py <ime_modela> <crew/discussion>
