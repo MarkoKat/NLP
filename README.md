@@ -105,7 +105,7 @@ Dodatni paramater:
 
 Povezave do modelov:
 - CREW: https://drive.google.com/file/d/1667DufLncZIYKBk_j4NikFWp8BDyvVsf/view?usp=sharing
-- Discussion: https://drive.google.com/file/d/13gpyWVPRH07claWwTGBzxPcrxBubUsVd/view?usp=sharing
+- Discussion: https://drive.google.com/file/d/16n5Rci77j7CgWti43_OrabVBs4WysV-h/view?usp=sharing
 
 Zagon (priporočena je uporaba CUDA-e):
 
